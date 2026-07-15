@@ -41,6 +41,10 @@ def main():
     parser = argparse.ArgumentParser(description="CRE Isometric Drawing Agent CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    # Convert PNG command
+    png_parser = subparsers.add_parser("convert-png", help="Convert PDF pages to PNG images")
+    png_parser.add_argument("--pages", type=int, nargs="*", help="Page numbers to convert")
+
     # Generate command
     gen_parser = subparsers.add_parser("generate", help="Generate deliverables for a specific page")
     gen_parser.add_argument("--page", type=int, required=True, help="Page number (e.g. 70, 71, 72)")
@@ -56,7 +60,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == "generate":
+    if args.command == "convert-png":
+        from convert_all_pdfs_to_png import convert_all
+        convert_all(args.pages)
+    elif args.command == "generate":
         sys.exit(generate_page(args.page))
     elif args.command == "validate":
         sys.exit(validate_dxf(args.dxf_path, args.allow_axis))
