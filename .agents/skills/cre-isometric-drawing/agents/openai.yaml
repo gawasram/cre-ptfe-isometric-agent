@@ -1,0 +1,4 @@
+interface:
+  display_name: "CRE PTFE Isometric Drawing"
+  short_description: "Generate and validate CRE PTFE CAD drawings"
+  default_prompt: "Use $cre-isometric-drawing to prepare and validate the next CRE PTFE isometric drawing from its split source PDF."

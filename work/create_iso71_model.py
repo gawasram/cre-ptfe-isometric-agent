@@ -50,6 +50,7 @@ DIM_ARROW_BASE = DIM_ARROW_LENGTH / 3.0
 DIM_EXT_OFFSET = DIM_TEXT_HEIGHT * 0.5
 DIM_EXT_EXCEED = DIM_TEXT_HEIGHT * 0.5
 DIM_TEXT_GAP = DIM_TEXT_HEIGHT * 0.4
+ISOMETRIC_AXIS_TOLERANCE_DEG = 0.2
 
 
 def validate_split_source():
@@ -83,6 +84,20 @@ def add_text(x, y, value, size=2.5, layer="TEXT", rotation=0.0,
                      "bold": bold, "align": align})
 
 
+def balloon_leader_start(bubble, target, radius):
+    """Return the exact balloon-perimeter point directed at ``target``."""
+    bx, by = bubble
+    tx, ty = target
+    dx, dy = tx - bx, ty - by
+    distance = math.hypot(dx, dy)
+    if distance <= float(radius) + 1e-9:
+        raise ValueError(
+            "balloon leader target must lie outside the balloon perimeter"
+        )
+    scale = float(radius) / distance
+    return bx + dx * scale, by + dy * scale
+
+
 def add_rect(x, y, w, h, layer="BORDER", width=0.18):
     add_polyline([(x, y), (x + w, y), (x + w, y + h), (x, y + h)],
                  layer, width, closed=True)
@@ -112,16 +127,17 @@ def add_table(x, y, widths, row_h, rows, font_size=2.6):
             rx += cell_w
 
 
-def add_balloon(x, y, label, radius=3.2):
+def add_balloon(x, y, label, radius=2.3):
     add_circle(x, y, radius, "CALLOUT", 0.35)
-    add_text(x, y - 0.90, str(label), 2.2, "CALLOUT", bold=True, align="center")
+    add_text(x, y - 0.90, str(label), 1.8, "CALLOUT", bold=True, align="center")
 
 
 def add_small_callout(number, bubble, target):
     bx, by = bubble
-    tx, ty = target
-    add_line(bx, by, tx, ty, "CALLOUT", 0.20)
-    add_circle(bx, by, 2.15, "CALLOUT", 0.35)
+    radius = 2.15
+    leader_start = balloon_leader_start(bubble, target, radius)
+    add_line(*leader_start, *target, "CALLOUT", 0.20)
+    add_circle(bx, by, radius, "CALLOUT", 0.35)
     add_text(bx, by - 0.90, str(number), 1.80, "CALLOUT", bold=True, align="center")
 
 
@@ -202,15 +218,21 @@ def add_single_dimension(p1, p2, label, offset, oblique_angle=None):
 
 
 def get_default_oblique_angle(p1, p2):
+    """Choose Group Code 52 only for a true 30/90/150 baseline."""
     dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    angle = (math.degrees(math.atan2(dy, dx)) % 180.0)
-    if math.isclose(angle, 90.0, abs_tol=5.0):
+    if math.hypot(dx, dy) <= 1e-9:
+        raise ValueError("cannot choose an oblique angle for a zero-length baseline")
+    angle = math.degrees(math.atan2(dy, dx)) % 180.0
+    if math.isclose(angle, 90.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 30.0
-    elif math.isclose(angle, 30.0, abs_tol=5.0) or math.isclose(angle, 210.0, abs_tol=5.0):
+    if math.isclose(angle, 30.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 150.0
-    elif math.isclose(angle, 150.0, abs_tol=5.0) or math.isclose(angle, 330.0, abs_tol=5.0):
+    if math.isclose(angle, 150.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 30.0
-    return 30.0
+    raise ValueError(
+        f"dimension baseline is {angle:.6f} degrees; expected 30, 90 or 150. "
+        "Pass oblique_angle explicitly only for a source-proven projection."
+    )
 
 
 def add_dimension_pair(p1, p2, labels, offsets=(6.0, 11.0), oblique_angle=None):
@@ -449,7 +471,7 @@ def build_entities():
 
     draw_pipe(p0, p1)
     add_single_dimension(p0, p1, "3127", offset=-10.0)
-    add_text((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 + 5.0, "<5> [1]", 2.35, "LABEL", rotation=30, bold=True, align="center")
+    add_text((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 + 5.0, "<5> [1]", 2.35, "LABEL", bold=True, align="center")
     add_text((p0[0] + p1[0]) / 2 + 5, (p0[1] + p1[1]) / 2 - 5.0, "1\"NS", 2.25, "LABEL", rotation=30, bold=True, align="center")
 
     # 45° Elbow at p1
@@ -460,7 +482,15 @@ def build_entities():
     draw_pipe(p1, p2)
 
     # Offset dimensions: horizontal 509, offset hypotenuse legs 360
-    add_single_dimension(p1, (p1[0] + 35.0, p1[1]), "509", offset=8.0)
+    # This is a source-proven horizontal projection, not an ordinary
+    # isometric baseline, so its Group-Code-52 value must be explicit.
+    add_single_dimension(
+        p1,
+        (p1[0] + 35.0, p1[1]),
+        "509",
+        offset=8.0,
+        oblique_angle=30.0,
+    )
     add_rect(p1[0] + 14.0, p1[1] + 2.0, 5.0, 5.0, "DIM", 0.20)
     add_text(p1[0] + 16.5, p1[1] + 3.0, "H", 2.0, "DIM", bold=True, align="center")
 
@@ -475,7 +505,7 @@ def build_entities():
     p3 = (p2[0] + 70.0 * u30[0], p2[1] + 70.0 * u30[1]) # Tee node
     draw_pipe(p2, p3)
     add_single_dimension(p2, p3, "1738", offset=-10.0)
-    add_text((p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2 + 5.0, "<3> [1]", 2.35, "LABEL", rotation=30, bold=True, align="center")
+    add_text((p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2 + 5.0, "<3> [1]", 2.35, "LABEL", bold=True, align="center")
 
     # Reducing Tee at p3
     add_small_callout("6", (p3[0] - 12.0, p3[1] - 10.0), p3)
@@ -484,7 +514,7 @@ def build_entities():
     p4 = (p3[0] + 65.0 * u30[0], p3[1] + 65.0 * u30[1]) # Continuation
     draw_pipe(p3, p4)
     add_single_dimension(p3, p4, "1530", offset=-10.0)
-    add_text((p3[0] + p4[0]) / 2, (p3[1] + p4[1]) / 2 + 5.0, "<1> [1]", 2.35, "LABEL", rotation=30, bold=True, align="center")
+    add_text((p3[0] + p4[0]) / 2, (p3[1] + p4[1]) / 2 + 5.0, "<1> [1]", 2.35, "LABEL", bold=True, align="center")
     add_text((p3[0] + p4[0]) / 2 + 5, (p3[1] + p4[1]) / 2 - 5.0, "1\"NS", 2.25, "LABEL", rotation=30, bold=True, align="center")
 
     add_text(p4[0] + 5, p4[1] + 5, "CONT. ON 1\"-SNA-418-1509-9-A82Y-E\nE 677022 N 550211 EL +106217",
@@ -496,7 +526,7 @@ def build_entities():
     branch_top = (p3[0], p3[1] + 35.0)
     draw_pipe(p3, branch_top)
     add_single_dimension(p3, branch_top, "190", offset=10.0, oblique_angle=30.0)
-    add_text(p3[0] + 4.0, p3[1] + 18.0, "<2> [1]", 2.35, "LABEL", rotation=90, bold=True, align="center")
+    add_text(p3[0] + 4.0, p3[1] + 18.0, "<2> [1]", 2.35, "LABEL", bold=True, align="center")
 
     # Balloon 2 on branch spool
     add_small_callout("2", (p3[0] - 12.0, p3[1] + 15.0), (p3[0], p3[1] + 18.0))
@@ -595,7 +625,7 @@ def export_dxf():
                 e = msp.add_solid(points[0], points[1], points[2], points[2], dxfattribs={"layer": layer})
                 e.dxf.lineweight = max(5, min(211, round(entity.get("width", 0.18) * 100)))
         elif kind == "text":
-            style = "CRE_ROMANS" if layer in ("CALLOUT", "DIM", "LABEL") else ("CRE_ARIAL_NARROW_BOLD" if entity.get("bold") else "CRE_ARIAL_NARROW")
+            style = "CRE_ROMANS" if layer in ("CALLOUT", "DIM") else ("CRE_ARIAL_NARROW_BOLD" if entity.get("bold") else "CRE_ARIAL_NARROW")
             text = msp.add_text(entity["value"], dxfattribs={
                 "height": entity["size"], "layer": layer,
                 "rotation": entity.get("rotation", 0.0),
@@ -639,6 +669,17 @@ def export_pdf_and_png():
         else:
             expanded_entities.append(entity)
 
+    registrations = (
+        ("CREArialNarrow", ARIAL_NARROW_PATH),
+        ("CREArialNarrowBold", ARIAL_NARROW_BOLD_PATH),
+        ("CRERomansPreview", ROMANS_PREVIEW_PATH),
+    )
+    registered = set(pdfmetrics.getRegisteredFontNames())
+    for name, path in registrations:
+        if name not in registered and path.is_file():
+            pdfmetrics.registerFont(TTFont(name, str(path)))
+            registered.add(name)
+
     c = canvas.Canvas(str(PDF_PATH), pagesize=(PAGE_W_MM * MM_TO_PT, PAGE_H_MM * MM_TO_PT))
 
     for e in expanded_entities:
@@ -672,7 +713,24 @@ def export_pdf_and_png():
             c.saveState()
             c.translate(e["x"] * MM_TO_PT, e["y"] * MM_TO_PT)
             c.rotate(e.get("rotation", 0.0))
-            font_name = "Helvetica-Bold" if e.get("bold") else "Helvetica"
+            if e.get("layer") in {"DIM", "CALLOUT"}:
+                font_name = (
+                    "CRERomansPreview"
+                    if "CRERomansPreview" in registered
+                    else "Times-Roman"
+                )
+            elif e.get("bold"):
+                font_name = (
+                    "CREArialNarrowBold"
+                    if "CREArialNarrowBold" in registered
+                    else "Helvetica-Bold"
+                )
+            else:
+                font_name = (
+                    "CREArialNarrow"
+                    if "CREArialNarrow" in registered
+                    else "Helvetica"
+                )
             c.setFont(font_name, e["size"] * MM_TO_PT)
             if e.get("align") == "center":
                 c.drawCentredString(0, 0, e["value"])

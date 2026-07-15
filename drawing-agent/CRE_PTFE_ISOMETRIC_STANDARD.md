@@ -13,7 +13,7 @@ The exact evidence extracted from the client DWG is recorded in
 active client conventions from unused legacy layers, blocks and non-uniformly
 scaled sheet geometry.
 
-Prefer the one-page split source PDFs in `/Users/ram/Downloads/ilovepdf_extracted-pages/` when available. Their page index is always 0; the original combined PDF page index is only used when a split page is missing.
+Prefer the one-page split source PDFs in `/Users/ram/Downloads/ilovepdf_extracted-pages/` when available. Their page index is always 0; the original combined PDF page index is only used when a split page is missing. When a sheet number or continuation note links another drawing sheet, render that companion sheet too and verify the line size, line number and connection continuity before drafting.
 
 Never infer a fabrication value from the NTS drawn length. Dimension labels are manually overridden with the verified source values.
 
@@ -82,6 +82,12 @@ Rotate only inline pipe-size/`NS` labels so they follow the 30-degree,
 A straight green leader must touch the exact pipe piece/component, stop at the
 balloon perimeter and normally have no arrowhead.
 
+Source cut-piece tags such as `<9>` and source circled weld numbers are not the
+new fabrication numbering system. Preserve their mapping in the drawing input
+and BOM. Do not duplicate source tags on the pipework when the new part
+balloons already identify each piece. If a source piece tag is deliberately
+shown, keep it horizontal; only the adjacent size/`NS` text may rotate.
+
 ## 5. Simplified topology rules
 
 - Draw one clean connected single-line network.
@@ -89,6 +95,17 @@ balloon perimeter and normally have no arrowhead.
 - Keep every valve, flange, reducer, elbow, tee and instrument visibly connected.
 - Use exact 30-degree, 150-degree and vertical isometric runs. Geometry is NTS
   and may be repositioned for clarity.
+- Treat the drawing as a connection graph before treating it as a picture.
+  Non-connected projected runs must not cross, touch or pass so close that they
+  look joined. Separate a source-page projection crossing when necessary while
+  preserving every real connection, branch and relative route relationship.
+- Preserve the exact internal order of crowded assemblies. Reconcile each
+  flange, valve, figure-8, blind and branch fitting against both the source BOM
+  quantity and the enlarged source symbol before simplifying it.
+- A printed compass bearing or orientation note describes the plant route or
+  component orientation; it does not by itself permit an off-axis schematic
+  pipe run. Keep the clean drawing on 30/150/90-degree axes unless the source
+  proves that the displayed fabrication geometry itself requires an exception.
 - Use compact, recognisable symbols:
   - flange: two close parallel lines perpendicular to the pipe;
   - valve: bow-tie/diamond body between flange faces;
@@ -96,11 +113,15 @@ balloon perimeter and normally have no arrowhead.
   - eccentric reducer: tapered transition and exact offset note;
   - orifice element: two flange faces, spool/plate indication and tag when supplied;
   - blind flange: flange pair with an outer cap line.
-- Do not import source weld circles, elevations, gasket identifiers or the source title block.
+- Do not import source weld circles, elevations, gasket identifiers, joint-group
+  `F/G/B` tags, boxed inspection `H` marks or the source title block unless the
+  client requests a separate weld, joint or inspection schedule.
 - The reference has no pipe `ARC` or `SPLINE` entities. Do not add decorative
   curves, fillets or image-traced wobble. Use crisp connected lines and compact
   schematic elbow symbols. Use a curve only for a source-supported component
   detail.
+- A `PIPE` polyline is not an axis-check bypass: every segment must still lie
+  on an allowed source-recorded axis, and the validator checks each segment.
 - Use true `CIRCLE` entities for new balloons. Do not reproduce the reference
   balloon ellipse ratio; it is an old non-uniform scaling artefact.
 
@@ -129,6 +150,11 @@ for part number, description, size, length and quantity. Adjust only enough to
 prevent real content from colliding with cell borders.
 
 Before drawing, reconcile the number of balloon occurrences with the BOM quantity.
+
+Also sum verified cut lengths by size and material/specification and compare
+them with any source fabrication-material pipe allowance. Record the source
+rounding or variance. Never alter a verified cut length merely to force the
+sum to equal a rounded bulk allowance.
 
 ## 7. Dimensions and labels
 
@@ -175,6 +201,18 @@ that source value in the drawing specification.
 
 Continuation wording must come from the source, such as `CONT. FROM DRG 1`. Do not invent another line number or continuation direction.
 
+Record every physical open endpoint, including side continuations at tees and
+equipment nozzles—not only a nominal start and end. Capture exact wording,
+size, printed E/N/EL coordinates and continuation dimension; explicitly mark
+an absent or illegible value rather than inventing one. Verify linked-sheet
+continuity whenever a continuation names another drawing.
+
+The dimension label and endpoints are source-controlled; the plotted side and
+offset are not. Choose or flip the offset so extension lines, text and arrows
+remain clear of components and balloons. Increasing or reversing an offset is
+allowed for readability only when the source value, endpoints, baseline axis
+and required Group Code 52 oblique angle remain unchanged.
+
 ## 8. Title block
 
 Use the CRE title block with:
@@ -192,6 +230,16 @@ Use the CRE title block with:
 
 Use the actual drafter name. Leave check and approval fields blank until confirmed by the client.
 
+Supply customer and project wording explicitly from source/client evidence;
+never inherit them from a prior page or a code default. Include a north arrow
+only when the source page or governing client model shows one, and preserve its
+orientation. Do not let a generic title-block helper invent plant orientation.
+
+Populate `REV.` only from the matching source title-block revision field.
+Record a footer/document revision separately and do not substitute it for the
+drawing revision. Keep the chosen output revision and its exact evidence in
+the page input specification.
+
 The client projection symbol is required. Preserve the supplied cone/circle
 orientation; do not label its projection method without client or model
 evidence. Use yellow geometry with CENTRE/CENTER axes and keep it centred
@@ -199,7 +247,10 @@ inside its title-block cell.
 
 ## 9. Reusable implementation
 
-Use the reusable helpers in `work/create_iso70_model.py` as a code-pattern
+Use `work/cre_standard_lib.py` for page-neutral pipe-axis guards, component
+symbols, title block, bottom-up BOM, live dimensions, perimeter-start balloons,
+role-aware PDF preview, DXF export and audited DWG conversion. Use
+`work/create_iso70_model.py` only as a historical complex-layout code-pattern
 reference for:
 
 - A2 PDF/DXF generation;
@@ -215,15 +266,20 @@ crossing ticks used by an earlier trial version. Use
 `work/analyze_reference_dxf.py` to re-audit any replacement client reference
 before changing this standard.
 
-Before delivery, run:
+Before delivery, run the runtime-safe agent wrapper:
 
 ```sh
-python3 work/validate_cre_ptfe_dxf.py outputs/ISO_<number>_PTFE.dxf
+python3 work/cre_agent.py validate outputs/ISO_<number>_PTFE.dxf
 ```
 
 For a source-proven nonstandard display axis, record the evidence in the input
 sheet and pass it explicitly, for example `--allow-axis 0`. Do not use an
 exception merely to silence an accidental off-axis line.
+
+Use the Python 3.12 workspace runtime returned by the Codex dependency loader.
+The vendored CAD libraries are compiled for CPython 3.12 and do not run under
+macOS `/usr/bin/python3` 3.9. `work/cre_agent.py` selects the compatible runtime
+for its child commands and reports a clear error when none is available.
 
 Do not recreate the removed legacy source-vector import path. A
 generated PDF/PNG is a visual preview; the DXF/DWG and an AutoCAD plot using
@@ -236,6 +292,21 @@ model-space frame.
 
 For a new drawing, replace all page-specific nodes, dimensions, labels, callout lists and BOM rows. Do not copy ISO 70 geometry into another design.
 
+The validator treats balloon-circle, number, perimeter and clearance failures
+as blocking. Possible leader-path crossings are advisory because a leader that
+ends on a multi-line flange or valve can intersect the target symbol itself.
+Remove every unrelated dimension, pipe or component crossing and visually
+document the remaining target-symbol-only cases before delivery.
+
+Render the final PDF itself to a separate PNG for the last visual check. Keep
+temporary conversion scripts and AutoCAD `.bak` files out of the delivery
+folder; archive them with any superseded same-basename outputs.
+
+Run `work/tests/test_cre_standard_lib.py` after changing the shared primitives.
+The smoke test must still generate a strict-validator-clean DXF and a PDF-derived
+PNG. Run it with `CRE_TEST_AUTOCAD=1` when changing DWG conversion; the final
+saved DWG must pass a second AutoCAD audit with zero errors and zero fixes.
+
 ## 10. Required quality gate
 
 Do not deliver until all of these are true:
@@ -247,12 +318,16 @@ Do not deliver until all of these are true:
 - dimension arrows are closed-filled and extension-line/text spacing matches
   the profile;
 - ordinary pipe runs use exact 30/150/90-degree axes;
+- unrelated projected runs do not create false visual connections;
 - balloons are true circles, upright and centred, with straight no-arrow
-  leaders terminating correctly;
+  leaders starting at the perimeter and terminating correctly;
 - only inline pipe-size labels rotate with the isometric axis;
 - special reducer/instrument/connection notes are retained;
 - no invented source metadata remains;
 - A2 PDF renders without clipping or unreadable text;
 - DXF audit reports zero errors;
 - automated CRE DXF validation passes with only documented source exceptions;
-- AutoCAD `AUDIT` reports zero errors.
+- every advisory leader crossing has been visually classified and any
+  unrelated crossing removed;
+- the final PDF render, not only the generator preview, passes visual review;
+- AutoCAD `AUDIT` on the final DWG reports `0` errors and `0` fixes.

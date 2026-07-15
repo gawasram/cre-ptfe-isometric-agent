@@ -29,11 +29,12 @@ def convert_pdf_to_png(pdf_file: Path) -> Path:
     return out_png
 
 
-def convert_all(pages: list[int] | None = None):
+def convert_all(pages: list[int] | None = None) -> tuple[int, int]:
     pdf_files = sorted(EXTRACTED_PAGES_DIR.glob("*.pdf"))
     print(f"Found {len(pdf_files)} PDF pages in {EXTRACTED_PAGES_DIR}")
 
     count = 0
+    failures = 0
     for pdf_file in pdf_files:
         try:
             page_no = int(pdf_file.stem.split("-")[-1])
@@ -43,8 +44,12 @@ def convert_all(pages: list[int] | None = None):
             count += 1
         except Exception as e:
             print(f"❌ Error converting {pdf_file.name}: {e}")
+            failures += 1
 
     print(f"\n✨ Successfully converted {count} PDF pages to PNG images in {PNG_PAGES_DIR}")
+    if failures:
+        print(f"❌ Failed to convert {failures} PDF page(s)")
+    return count, failures
 
 
 def main():
@@ -52,7 +57,8 @@ def main():
     parser.add_argument("--pages", type=int, nargs="*", help="Optional list of page numbers to convert (e.g. 70 71 72 106)")
     args = parser.parse_args()
 
-    convert_all(args.pages)
+    _count, failures = convert_all(args.pages)
+    raise SystemExit(1 if failures else 0)
 
 
 if __name__ == "__main__":

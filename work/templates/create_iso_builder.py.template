@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Source-controlled CRE generator scaffold for viewer page __PAGE_NUMBER__."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pdfplumber
+
+from cre_standard_lib import CREModelBuilder
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PAGE_NUMBER = __PAGE_NUMBER__
+SOURCE_PDF = Path(r"__SOURCE_PDF__")
+OUTPUT_DIR = ROOT / "outputs"
+
+
+def validate_source() -> None:
+    if not SOURCE_PDF.is_file():
+        raise FileNotFoundError(f"Split source PDF not found: {SOURCE_PDF}")
+    with pdfplumber.open(SOURCE_PDF) as document:
+        if len(document.pages) != 1:
+            raise ValueError(
+                f"Expected one split source page, found {len(document.pages)}"
+            )
+
+
+def build_sheet(builder: CREModelBuilder) -> None:
+    """Replace this guard only after completing ISO_<page>_INPUT.md.
+
+    Build the source-reconciled graph, dimensions, balloons and BOM here.
+    Call ``builder.add_title_block(...)`` with explicit customer, project,
+    revision, drafter/date, sheet, line number and ``include_north_arrow``
+    evidence. Never copy another page's data into this function.
+    """
+    raise NotImplementedError(
+        "Complete and reconcile the page input specification before drawing"
+    )
+
+
+def main() -> None:
+    validate_source()
+    builder = CREModelBuilder(f"ISO_{PAGE_NUMBER}_PTFE", OUTPUT_DIR)
+    build_sheet(builder)
+    builder.export_pdf_and_png()
+    builder.export_dxf()
+    builder.compile_dwg_via_accoreconsole()
+
+
+if __name__ == "__main__":
+    main()

@@ -56,6 +56,7 @@ DIM_ARROW_BASE = DIM_ARROW_LENGTH / 3.0
 DIM_EXT_OFFSET = DIM_TEXT_HEIGHT * 0.5
 DIM_EXT_EXCEED = DIM_TEXT_HEIGHT * 0.5
 DIM_TEXT_GAP = DIM_TEXT_HEIGHT * 0.4
+ISOMETRIC_AXIS_TOLERANCE_DEG = 0.2
 
 
 def validate_split_source():
@@ -100,6 +101,25 @@ def add_text(x, y, value, size=2.5, layer="TEXT", rotation=0.0,
                      "bold": bold, "align": align})
 
 
+def balloon_leader_start(bubble, target, radius):
+    """Return the point where a straight leader leaves a balloon circle.
+
+    The public helper is intentionally page-independent so a new ISO generator
+    can reuse it.  A target inside (or at the centre of) the bubble is a
+    drafting error because no outward leader segment can be constructed.
+    """
+    bx, by = bubble
+    tx, ty = target
+    dx, dy = tx - bx, ty - by
+    distance = math.hypot(dx, dy)
+    if distance <= float(radius) + 1e-9:
+        raise ValueError(
+            "balloon leader target must lie outside the balloon perimeter"
+        )
+    scale = float(radius) / distance
+    return bx + dx * scale, by + dy * scale
+
+
 def add_rect(x, y, w, h, layer="BORDER", width=0.18):
     add_polyline([(x, y), (x + w, y), (x + w, y + h), (x, y + h)],
                  layer, width, closed=True)
@@ -134,9 +154,10 @@ def add_table(x, y, widths, row_h, rows, font_size=2.6):
 
 def add_callout(number, bubble, target):
     bx, by = bubble
-    tx, ty = target
-    add_line(bx, by, tx, ty, "CALLOUT", 0.20)
-    add_circle(bx, by, 2.30, "CALLOUT", 0.35)
+    radius = 2.30
+    leader_start = balloon_leader_start(bubble, target, radius)
+    add_line(*leader_start, *target, "CALLOUT", 0.20)
+    add_circle(bx, by, radius, "CALLOUT", 0.35)
     add_text(bx, by - 0.90, number, 1.80, "CALLOUT", bold=True, align="center")
 
 
@@ -310,9 +331,10 @@ def draw_blind_flange(center, angle_deg):
 
 def add_small_callout(number, bubble, target):
     bx, by = bubble
-    tx, ty = target
-    add_line(bx, by, tx, ty, "CALLOUT", 0.20)
-    add_circle(bx, by, 2.15, "CALLOUT", 0.35)
+    radius = 2.15
+    leader_start = balloon_leader_start(bubble, target, radius)
+    add_line(*leader_start, *target, "CALLOUT", 0.20)
+    add_circle(bx, by, radius, "CALLOUT", 0.35)
     add_text(bx, by - 0.90, number, 1.80, "CALLOUT", bold=True, align="center")
 
 
@@ -321,15 +343,26 @@ def add_single_dimension(p1, p2, label, offset, oblique_angle=None):
 
 
 def get_default_oblique_angle(p1, p2):
+    """Choose the CRE Group-Code-52 angle for a standard isometric baseline.
+
+    Nonstandard/source-proven projection dimensions must pass an explicit
+    ``oblique_angle``.  Silently defaulting an off-axis baseline made malformed
+    geometry look compliant in earlier generators.
+    """
     dx, dy = p2[0] - p1[0], p2[1] - p1[1]
-    angle = (math.degrees(math.atan2(dy, dx)) % 180.0)
-    if math.isclose(angle, 90.0, abs_tol=5.0):
+    if math.hypot(dx, dy) <= 1e-9:
+        raise ValueError("cannot choose an oblique angle for a zero-length baseline")
+    angle = math.degrees(math.atan2(dy, dx)) % 180.0
+    if math.isclose(angle, 90.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 30.0
-    elif math.isclose(angle, 30.0, abs_tol=5.0) or math.isclose(angle, 210.0, abs_tol=5.0):
+    if math.isclose(angle, 30.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 150.0
-    elif math.isclose(angle, 150.0, abs_tol=5.0) or math.isclose(angle, 330.0, abs_tol=5.0):
+    if math.isclose(angle, 150.0, abs_tol=ISOMETRIC_AXIS_TOLERANCE_DEG):
         return 30.0
-    return 30.0
+    raise ValueError(
+        f"dimension baseline is {angle:.6f} degrees; expected 30, 90 or 150. "
+        "Pass oblique_angle explicitly only for a source-proven projection."
+    )
 
 
 def add_dimension_pair(p1, p2, labels, offsets=(6.0, 11.0), oblique_angle=None):
@@ -745,7 +778,7 @@ def build_reference_sheet():
 
     # Capsule stadium tag and square balloon 19 for 300 mm orifice 424-SG-1601
     add_stadium_tag("424-SG-1601", 82.0, 335.0, number="19", target=orifice_300_c)
-    add_text(118.0, 395.0, "<16>", 2.35, "LABEL", rotation=90, bold=True, align="center")
+    add_text(118.0, 395.0, "<16>", 2.35, "LABEL", bold=True, align="center")
     add_text(124, 293.363, "EL +104053", 2.25, "LABEL", bold=True)
     add_text(290, 510, "EL +105122", 2.25, "LABEL", bold=True)
     add_text(243, 442, '1"x1"NS EL +104188', 2.25, "LABEL", bold=True)
@@ -756,26 +789,26 @@ def build_reference_sheet():
 
     # Fabrication balloons: repeated components carry the same BOM number.
     callouts = [
-        ("1", (368, 362), midpoint(ball_right_p2, tee_b)),
+        ("1", (366, 360), midpoint(ball_right_p2, tee_b)),
         ("2", (249, 421), midpoint(tee_a, ball_left_p1)),
-        ("3", (300, 425), midpoint(tee_a, globe_p1)),
+        ("3", (298, 423), midpoint(tee_a, globe_p1)),
         ("4", (286, 471), midpoint(elbow_d, tee_a)),
-        ("5", (191, 471), midpoint(elbow_c, elbow_d)),
+        ("5", (191, 469), midpoint(elbow_c, elbow_d)),
         ("6", (100, 378), midpoint(or300_p2, elbow_c)),
         ("7", (88, 271), midpoint(elbow_a, elbow_b)),
         ("8", (46, 247), midpoint(reducer_start, reducer_end)),
-        ("9", (283, 438), tee_a), ("9", (371, 384), tee_b),
-        ("10", (283, 371), red_tee_a), ("10", (365, 334), red_tee_b),
-        ("11", (60, 249), elbow_a), ("11", (133, 293.363), elbow_b),
-        ("11", (105, 429), elbow_c), ("11", (282, 516), elbow_d),
+        ("9", (283, 438), tee_a), ("9", (377, 384), tee_b),
+        ("10", (283, 373), red_tee_a), ("10", (365, 334), red_tee_b),
+        ("11", (60, 251), elbow_a), ("11", (133, 289.363), elbow_b),
+        ("11", (101, 431), elbow_c), ("11", (282, 516), elbow_d),
         ("11", (263, 378), elbow_e), ("11", (393, 292), elbow_f),
         ("12", (36, 268), ext_flange),
         ("13", (133, 309.363), or300_p1), ("13", (133, 333.363), or300_p2),
-        ("13", (313, 414), globe_p1), ("13", (347, 389), globe_p2),
+        ("13", (313, 414), globe_p1), ("13", (347, 387), globe_p2),
         ("13", (260, 418), ball_left_p1), ("13", (260, 396), ball_left_p2),
-        ("13", (307, 348), or600_p1), ("13", (335, 320), or600_p2),
+        ("13", (307, 350), or600_p1), ("13", (335, 320), or600_p2),
         ("13", (368, 346), ball_right_p2), ("13", (368, 324), ball_right_p1),
-        ("14", (273, 348), branch_left_top), ("14", (347, 311), branch_right_top),
+        ("14", (273, 348), branch_left_top), ("14", (347, 309), branch_right_top),
         ("15", (273, 312), branch_left_bottom), ("15", (347, 276), branch_right_bottom),
         ("16", (339, 416), globe_c),
         ("17", (241, 406), ball_left_c), ("17", (403, 335), ball_right_c),
@@ -1223,4 +1256,3 @@ if __name__ == "__main__":
     print(PNG_PATH)
     print(f"source={SOURCE_PDF}")
     print(f"entities={len(entities)}")
-

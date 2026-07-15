@@ -1,49 +1,112 @@
 {
-  "page_number": 106,
-  "line_number": "2\"-WNA-418-1401-A82Y-G",
-  "sheet_number": "2 OF 2",
-  "project": "MIL PROJECT, TNT PLANT, HEF KHADKI PUNE, INDIA.",
-  "unit_name": "SNA,WNA & OLEUM TANKS",
-  "job_no": "B889",
-  "zone": "G",
-  "unit": "418A",
-  "revision": "-1",
-  "cut_lengths": [
-    {"piece": "<9>", "cut_length_mm": 6287, "pipe_size": "2\""},
-    {"piece": "<10>", "cut_length_mm": 273, "pipe_size": "2\""},
-    {"piece": "<11>", "cut_length_mm": 340, "pipe_size": "2\""},
-    {"piece": "<12>", "cut_length_mm": 1670, "pipe_size": "2\""},
-    {"piece": "<13>", "cut_length_mm": 220, "pipe_size": "2\""},
-    {"piece": "<14>", "cut_length_mm": 100, "pipe_size": "3/4\""},
-    {"piece": "<15>", "cut_length_mm": 1041, "pipe_size": "2\""},
-    {"piece": "<16>", "cut_length_mm": 160, "pipe_size": "2\""}
+  "drawing": "ISO_106_PTFE",
+  "status": "ready_for_client_review",
+  "viewer_page": 106,
+  "document_page": "1149 of 2770",
+  "source_pdf": "/Users/ram/Downloads/ilovepdf_extracted-pages/ISOMETRICS FOR PTFE SPOOL PREPARATION-1044-1150-106.pdf",
+  "linked_sheet": {
+    "viewer_page": 105,
+    "document_page": "1148 of 2770",
+    "sheet_number": "1 OF 2",
+    "continuity_evidence": "CONT. ON DRG 2; 2-inch; EL +101830; 12.99-degree route annotation"
+  },
+  "identification": {
+    "line_number": "2\"-WNA-418-1401-A82Y-G",
+    "unit": "418A",
+    "sheet_number": "2 OF 2",
+    "revision": "-1",
+    "revision_evidence": "page 106 title-block REV field",
+    "footer_document_revision": "Rev. A",
+    "project": "MIL PROJECT, TNT PLANT, HEF KHADKI PUNE, INDIA",
+    "job_number": "B889",
+    "zone": "G"
+  },
+  "external_connections": [
+    {
+      "wording": "CONT. FROM DRG 1",
+      "size": "2\"",
+      "elevation_from_linked_sheet": "+101830",
+      "evidence_state": "linked page 105; E/N not printed at page 106 endpoint"
+    },
+    {
+      "wording": "CONT. ON 2\"-WNA-418-1401-1-A82Y-G",
+      "east": 676931,
+      "north": 602970,
+      "elevation": "+101830"
+    },
+    {
+      "wording": "CONT. ON 2\"-WNA-418-1402-A82Y-G",
+      "east": 676884,
+      "north": 603047,
+      "elevation": "+102230"
+    },
+    {
+      "wording": "CONN. TO 418-T-102B/F",
+      "east": 678505,
+      "north": 602352,
+      "elevation": "+104450"
+    }
   ],
-  "bom_items": [
-    {"pt_no": 1, "description": "PIPE B-36.19 BE SEAMLESS 40S", "nominal_size": "2\"", "item_code": "PI3D217Z00913ZZZZ", "qty": "10.0M"},
-    {"pt_no": 2, "description": "PIPE B-36.19 PE SEAMLESS 80S", "nominal_size": "3/4\"", "item_code": "PI3D277Z00514ZZZZ", "qty": "0.1M"},
-    {"pt_no": 3, "description": "T.EQUAL B-16.9 BW 40S", "nominal_size": "2 x 2", "item_code": "WEGC84ZZ00913ZZZZ", "qty": "2 NO"},
-    {"pt_no": 4, "description": "WELDOLET MSS-SP97 BW 40S 80S", "nominal_size": "2 x 3/4", "item_code": "YWSAF4ZZ009130514", "qty": "1 NO"},
-    {"pt_no": 5, "description": "ELBOW.90 B-16.9 BW 1.5D 40S", "nominal_size": "2\"", "item_code": "WAGC84Z100913ZZZZ", "qty": "4 NO"},
-    {"pt_no": 6, "description": "FLNG.FIG.8 ASME-B16.48 150 FF/125AARH", "nominal_size": "2\"", "item_code": "FGKG521Z009ZZZZZ", "qty": "1 NO"},
-    {"pt_no": 7, "description": "FLNG.WN B-16.5 150 RF/125AARH 40S", "nominal_size": "2\"", "item_code": "FWCG527Z00913ZZZZ", "qty": "3 NO"},
-    {"pt_no": 8, "description": "FLNG.WN B-16.5 150 RF/125AARH 80S", "nominal_size": "3/4\"", "item_code": "FWCG527Z00514ZZZZ", "qty": "1 NO"},
-    {"pt_no": 9, "description": "FLNG.BLIND B-16.5 150 RF/125AARH", "nominal_size": "3/4\"", "item_code": "FBCG527Z005ZZZZZ", "qty": "1 NO"},
-    {"pt_no": 10, "description": "GASKET B-16.20-ANSI B16.5 SPIRAL 150", "nominal_size": "2\"", "item_code": "GK6CF72Z009ZZZZZ", "qty": "4 NO"},
-    {"pt_no": 11, "description": "GASKET B-16.20-ANSI B16.5 SPIRAL 150", "nominal_size": "3/4\"", "item_code": "GK6CF72Z005ZZZZZ", "qty": "2 NO"},
-    {"pt_no": 12, "description": "95 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "5/8\"", "item_code": "--", "qty": "4 NO"},
-    {"pt_no": 13, "description": "83 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "5/8\"", "item_code": "--", "qty": "8 NO"},
-    {"pt_no": 14, "description": "64 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "1/2\"", "item_code": "--", "qty": "8 NO"},
-    {"pt_no": 15, "description": "VLV.BALL SHEET 543DR", "nominal_size": "2\"", "item_code": "543DRZZZ009ZZZZZ", "qty": "1 NO"},
-    {"pt_no": 16, "description": "VLV.BALL SHEET 543DR", "nominal_size": "3/4\"", "item_code": "543DRZZZ005ZZZZZ", "qty": "1 NO"}
+  "cut_pieces": [
+    {"source_piece": "<9>", "new_part": 1, "size": "2\"", "cut_mm": 6287, "overall_mm": 6351},
+    {"source_piece": "<10>", "new_part": 2, "size": "2\"", "cut_mm": 273, "overall_mm": 400},
+    {"source_piece": "<11>", "new_part": 3, "size": "2\"", "cut_mm": 340, "overall_mm": 480},
+    {"source_piece": "<12>", "new_part": 4, "size": "2\"", "cut_mm": 1670, "overall_mm": 1810},
+    {"source_piece": "<13>", "new_part": 5, "size": "2\"", "cut_mm": 220, "overall_mm": 359},
+    {"source_piece": "<14>", "new_part": 6, "size": "3/4\"", "cut_mm": 100, "overall_mm": 210},
+    {"source_piece": "<15>", "new_part": 7, "size": "2\"", "cut_mm": 1041, "overall_mm": 1162},
+    {"source_piece": "<16>", "new_part": 8, "size": "2\"", "cut_mm": 160, "overall_mm": 305}
+  ],
+  "pipe_allowance_reconciliation": [
+    {"size": "2\"", "specification": "B-36.19 seamless 40S", "cut_total_mm": 9991, "source_allowance_m": 10.0, "explanation": "9 mm rounding difference; verified cuts unchanged"},
+    {"size": "3/4\"", "specification": "B-36.19 seamless 80S", "cut_total_mm": 100, "source_allowance_m": 0.1, "explanation": "exact"}
+  ],
+  "fabrication_components": [
+    {"new_part": 9, "description": "EQUAL TEE", "size": "2\"x2\"", "quantity": 2},
+    {"new_part": 10, "description": "WELDOLET", "size": "2\"x3/4\"", "quantity": 1},
+    {"new_part": 11, "description": "90 DEG ELBOW", "size": "2\"", "quantity": 4},
+    {"new_part": 12, "description": "FIGURE-8 FLANGE CL150", "size": "2\"", "quantity": 1},
+    {"new_part": 13, "description": "WN FLANGE CL150", "size": "2\"", "quantity": 3},
+    {"new_part": 14, "description": "WN FLANGE CL150", "size": "3/4\"", "quantity": 1},
+    {"new_part": 15, "description": "BLIND FLANGE CL150", "size": "3/4\"", "quantity": 1},
+    {"new_part": 16, "description": "BALL VALVE", "size": "2\"", "length_mm": 178, "quantity": 1},
+    {"new_part": 17, "description": "BALL VALVE", "size": "3/4\"", "length_mm": 118, "quantity": 1}
   ],
   "topology": [
-    {"type": "pipe", "spool": "<9>", "size": "2\"NS", "dim": 6351, "cut_len": 6287, "start": "CONT. FROM DRG 1"},
-    {"type": "pipe", "spool": "<10>", "size": "2\"NS", "dim": 400, "cut_len": 273, "start": "CONT. ON 2\"-WNA-418-1401-1-A82Y-G"},
-    {"type": "pipe", "spool": "<11>", "size": "2\"NS", "dim": 480, "cut_len": 340, "angle": "13°/77°"},
-    {"type": "pipe", "spool": "<12>", "size": "2\"NS", "dim": 1810, "cut_len": 1670},
-    {"type": "pipe", "spool": "<13>", "size": "2\"NS", "dim": 359, "cut_len": 220, "elevation": "EL +104593"},
-    {"type": "pipe", "spool": "<14>", "size": "3/4\"NS", "dim": 118, "cut_len": 100},
-    {"type": "pipe", "spool": "<15>", "size": "2\"NS", "dim": 1017, "cut_len": 1041},
-    {"type": "pipe", "spool": "<16>", "size": "2\"NS", "dim": 305, "cut_len": 160, "end": "CONN. TO 418-T-102B/F"}
-  ]
+    "CONT. FROM DRG 1 -> <9> -> lower 2x2 tee",
+    "lower tee side -> CONT. ON 2\"-WNA-418-1401-1-A82Y-G",
+    "lower tee -> <10> -> upper 2x2 tee",
+    "upper tee side -> CONT. ON 2\"-WNA-418-1402-A82Y-G",
+    "upper tee -> <11> -> elbow -> <12> -> 2-inch flanged ball valve and figure-8 -> <13>",
+    "<13> -> elbow -> <15> -> elbow -> <16> -> elbow -> 2-inch WN flange -> 418-T-102B/F",
+    "weldolet from <15> -> <14> -> 3/4-inch WN flange -> 3/4-inch ball valve -> blind flange"
+  ],
+  "special_notes": [
+    "Both valves: SPINDLE W 12.99 N",
+    "Figure-8: TAIL N 12.99 E",
+    "Upper route elevation: EL +104593"
+  ],
+  "source_orientation_schedule": [
+    {"target": "drawing-1 continuation", "annotation": "13 DEG / linked sheet 12.99", "display_retained": false, "axis_exception": false},
+    {"target": "upper tee route", "annotation": "77 DEG", "display_retained": false, "axis_exception": false},
+    {"target": "equipment-end dogleg", "annotation": "13.1 DEG", "display_retained": true, "axis_exception": false},
+    {"target": "2-inch ball valve", "annotation": "SPINDLE W 12.99 N", "display_retained": true, "axis_exception": false},
+    {"target": "3/4-inch ball valve", "annotation": "SPINDLE W 12.99 N", "display_retained": true, "axis_exception": false},
+    {"target": "figure-8 flange", "annotation": "TAIL N 12.99 E", "display_retained": true, "axis_exception": false}
+  ],
+  "excluded_from_clean_fabrication_drawing": [
+    "source weld numbers 20-36",
+    "H inspection marks",
+    "gasket and bolt group tags",
+    "source erection gasket and stud schedule",
+    "source document-page metadata"
+  ],
+  "validation": {
+    "strict_dxf": "pass",
+    "dxf_audit": "0 errors / 0 fixes",
+    "leader_advisories": 7,
+    "leader_advisory_classification": "target-component symbol intersections",
+    "final_dwg_audit": "Total errors found 0 fixed 0",
+    "status": "ready for client review"
+  }
 }
