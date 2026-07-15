@@ -13,8 +13,6 @@ from pathlib import Path
 import pdfplumber
 from PIL import Image
 from reportlab.pdfgen import canvas
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color
 
 HERE = Path(__file__).resolve().parent
@@ -33,6 +31,78 @@ DIM_ARROW_BASE = DIM_ARROW_LENGTH / 3.0
 DIM_EXT_OFFSET = DIM_TEXT_HEIGHT * 0.5
 DIM_EXT_EXCEED = DIM_TEXT_HEIGHT * 0.5
 DIM_TEXT_GAP = DIM_TEXT_HEIGHT * 0.4
+
+
+def _readable_dimension_angle(angle_deg):
+    angle = ((angle_deg + 180.0) % 360.0) - 180.0
+    if angle > 90.0:
+        angle -= 180.0
+    elif angle <= -90.0:
+        angle += 180.0
+    return angle
+
+
+def _dimension_primitives(entity):
+    p1 = entity["p1"]
+    p2 = entity["p2"]
+    offset = entity["offset"]
+    oblique_angle = entity.get("oblique_angle", 0.0)
+    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
+    length = math.hypot(dx, dy)
+    if length == 0:
+        return []
+
+    ux, uy = dx / length, dy / length
+    nx, ny = -uy, ux
+
+    rad = math.radians(oblique_angle)
+    ex, ey = math.cos(rad), math.sin(rad)
+    dot = ex * nx + ey * ny
+    if abs(dot) < 1e-4:
+        ex, ey = nx, ny
+        dot = 1.0
+
+    shift = offset / dot
+    ax, ay = p1[0] + ex * shift, p1[1] + ey * shift
+    bx, by = p2[0] + ex * shift, p2[1] + ey * shift
+
+    ext_len = DIM_EXT_EXCEED
+    ext_off = DIM_EXT_OFFSET
+    e_len = math.hypot(ex, ey)
+    ev_x, ev_y = (ex / e_len, ey / e_len) if e_len > 0 else (nx, ny)
+    if offset < 0:
+        ev_x, ev_y = -ev_x, -ev_y
+
+    result = [
+        {"kind": "line", "x1": ax, "y1": ay, "x2": bx, "y2": by, "layer": "DIM", "width": 0.20},
+        {"kind": "line", "x1": p1[0] + ev_x * ext_off, "y1": p1[1] + ev_y * ext_off, "x2": ax + ev_x * ext_len, "y2": ay + ev_x * ext_len, "layer": "DIM", "width": 0.20},
+        {"kind": "line", "x1": p2[0] + ev_x * ext_off, "y1": p2[1] + ev_y * ext_off, "x2": bx + ev_x * ext_len, "y2": by + ev_x * ext_len, "layer": "DIM", "width": 0.20},
+    ]
+
+    half_base = DIM_ARROW_BASE / 2.0
+    for tip, inward in (((ax, ay), (ux, uy)), ((bx, by), (-ux, -uy))):
+        base_center = (tip[0] + inward[0] * DIM_ARROW_LENGTH, tip[1] + inward[1] * DIM_ARROW_LENGTH)
+        result.append({
+            "kind": "solid",
+            "points": [tip, (base_center[0] + nx * half_base, base_center[1] + ny * half_base), (base_center[0] - nx * half_base, base_center[1] - ny * half_base)],
+            "layer": "DIM",
+            "width": 0.50,
+        })
+
+    angle = _readable_dimension_angle(math.degrees(math.atan2(dy, dx)))
+    side = 1.0 if offset >= 0 else -1.0
+    result.append({
+        "kind": "text",
+        "x": (ax + bx) / 2.0 + nx * side * DIM_TEXT_GAP,
+        "y": (ay + by) / 2.0 + ny * side * DIM_TEXT_GAP,
+        "value": entity["label"],
+        "size": DIM_TEXT_HEIGHT,
+        "layer": "DIM",
+        "rotation": angle,
+        "bold": False,
+        "align": "center",
+    })
+    return result
 
 
 class CREModelBuilder:
@@ -109,7 +179,6 @@ class CREModelBuilder:
         self.add_text(bx, by - 0.90, str(number), 1.80, "CALLOUT", bold=True, align="center")
 
     def add_title_block(self, line_number: str, sheet_number="1 OF 1", drafter="RAM GAWAS", drawing_date="15.7.26", revision="0"):
-        # Outer Borders
         self.add_rect(8, 8, 404, 578, "BORDER", 0.35)
         self.add_rect(11, 11, 398, 572, "BORDER", 0.20)
         self.add_rect(11, 568, 112, 13, "BORDER", 0.20)
@@ -117,7 +186,6 @@ class CREModelBuilder:
         self.add_rect(309, 568, 100, 13, "BORDER", 0.20)
         self.add_text(359, 571.8, "DO NOT SCALE", 3.75, "TITLE", bold=True, align="center")
 
-        # Title Block Grid (Bottom-Right)
         tx, ty, tw, th = 215, 12, 190, 79
         self.add_rect(tx, ty, tw, th, "BORDER", 0.35)
         for y in [80, 69, 58, 43, 22]:
@@ -147,7 +215,6 @@ class CREModelBuilder:
             self.add_line(x, 12, x, 22, "BORDER", 0.20)
         self.add_text(240, 15.0, "SCALE=NTS", 2.7, "TITLE", bold=True, align="center")
 
-        # 3rd Angle Projection Cone & Circle Symbol
         self.add_line(270, 15, 280, 17, "SYMBOL", 0.20)
         self.add_line(270, 19, 280, 17, "SYMBOL", 0.20)
         self.add_line(270, 15, 270, 19, "SYMBOL", 0.20)
@@ -161,7 +228,6 @@ class CREModelBuilder:
         self.add_line(375, 16, 405, 16, "BORDER", 0.20)
         self.add_text(390, 12.5, revision, 2.3, "TITLE", bold=True, align="center")
 
-        # Revision Table (Bottom-Left)
         rx, ry, rw, rh = 15, 12, 195, 19
         self.add_rect(rx, ry, rw, rh, "BORDER", 0.25)
         self.add_line(rx, 22, rx + rw, 22, "BORDER", 0.20)
@@ -173,7 +239,6 @@ class CREModelBuilder:
         self.add_text(190.0, 15.0, "CHD.", 2.4, "TITLE", bold=True, align="center")
         self.add_text(204.0, 15.0, "APPD", 2.2, "TITLE", bold=True, align="center")
 
-        # North Arrow (Top-Right)
         na_x, na_y = 370.0, 540.0
         self.add_rect(na_x - 12, na_y - 12, 24, 24, "BORDER", 0.35)
         self.add_line(na_x - 8, na_y - 8, na_x + 6, na_y + 6, "BORDER", 0.35)
@@ -253,6 +318,62 @@ class CREModelBuilder:
 
         doc.saveas(self.dxf_path)
         print(f"Generated DXF: {self.dxf_path}")
+
+    def export_pdf_and_png(self):
+        expanded_entities = []
+        for entity in self.entities:
+            if entity["kind"] == "dimension":
+                expanded_entities.extend(_dimension_primitives(entity))
+            else:
+                expanded_entities.append(entity)
+
+        c = canvas.Canvas(str(self.pdf_path), pagesize=(PAGE_W_MM * MM_TO_PT, PAGE_H_MM * MM_TO_PT))
+        for e in expanded_entities:
+            kind = e["kind"]
+            if kind == "line":
+                c.setLineWidth(e.get("width", 0.18) * MM_TO_PT)
+                c.line(e["x1"] * MM_TO_PT, e["y1"] * MM_TO_PT, e["x2"] * MM_TO_PT, e["y2"] * MM_TO_PT)
+            elif kind == "polyline":
+                c.setLineWidth(e.get("width", 0.18) * MM_TO_PT)
+                p = c.beginPath()
+                pts = e["points"]
+                p.moveTo(pts[0][0] * MM_TO_PT, pts[0][1] * MM_TO_PT)
+                for pt in pts[1:]:
+                    p.lineTo(pt[0] * MM_TO_PT, pt[1] * MM_TO_PT)
+                if e.get("closed"):
+                    p.close()
+                c.drawPath(p)
+            elif kind == "circle":
+                c.setLineWidth(e.get("width", 0.18) * MM_TO_PT)
+                c.circle(e["x"] * MM_TO_PT, e["y"] * MM_TO_PT, e["r"] * MM_TO_PT)
+            elif kind == "solid":
+                c.setLineWidth(e.get("width", 0.18) * MM_TO_PT)
+                p = c.beginPath()
+                pts = e["points"]
+                p.moveTo(pts[0][0] * MM_TO_PT, pts[0][1] * MM_TO_PT)
+                for pt in pts[1:]:
+                    p.lineTo(pt[0] * MM_TO_PT, pt[1] * MM_TO_PT)
+                p.close()
+                c.drawPath(p, fill=1)
+            elif kind == "text":
+                c.saveState()
+                c.translate(e["x"] * MM_TO_PT, e["y"] * MM_TO_PT)
+                c.rotate(e.get("rotation", 0.0))
+                font_name = "Helvetica-Bold" if e.get("bold") else "Helvetica"
+                c.setFont(font_name, e["size"] * MM_TO_PT)
+                if e.get("align") == "center":
+                    c.drawCentredString(0, 0, e["value"])
+                else:
+                    c.drawString(0, 0, e["value"])
+                c.restoreState()
+
+        c.save()
+        print(f"Generated PDF: {self.pdf_path}")
+
+        with pdfplumber.open(self.pdf_path) as pdf:
+            im = pdf.pages[0].to_image(resolution=300)
+            im.save(self.png_path)
+            print(f"Generated PNG: {self.png_path}")
 
     def compile_dwg_via_accoreconsole(self):
         scr_path = self.output_dir / f"conv_{self.page_name.lower()}.scr"

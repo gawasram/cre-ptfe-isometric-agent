@@ -120,6 +120,7 @@ def main():
 
     # 5. Export CAD Deliverables
     builder.export_dxf()
+    builder.export_pdf_and_png()
     builder.compile_dwg_via_accoreconsole()
 
     print(f"✅ Generated deliverables for Page 106: {builder.dxf_path}")
