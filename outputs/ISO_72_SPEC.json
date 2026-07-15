@@ -1,0 +1,31 @@
+{
+  "page_number": 72,
+  "line_number": "",
+  "sheet_number": "1 OF 1",
+  "bom_items": [],
+  "cut_lengths": [],
+  "dimensions": [
+    {
+      "value": 1115,
+      "x": 71.3,
+      "y": 1164.2
+    },
+    {
+      "value": 2770,
+      "x": 101.1,
+      "y": 1164.2
+    },
+    {
+      "value": 3003,
+      "x": 192.7,
+      "y": 1164.2
+    },
+    {
+      "value": 80,
+      "x": 212.7,
+      "y": 1164.2
+    }
+  ],
+  "continuations": [],
+  "raw_text": "Page 1115 of 2770 : B889 000 WX MR 3003 80 RFQ : Rev. A"
+}
