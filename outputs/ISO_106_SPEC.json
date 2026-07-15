@@ -1,0 +1,49 @@
+{
+  "page_number": 106,
+  "line_number": "2\"-WNA-418-1401-A82Y-G",
+  "sheet_number": "2 OF 2",
+  "project": "MIL PROJECT, TNT PLANT, HEF KHADKI PUNE, INDIA.",
+  "unit_name": "SNA,WNA & OLEUM TANKS",
+  "job_no": "B889",
+  "zone": "G",
+  "unit": "418A",
+  "revision": "-1",
+  "cut_lengths": [
+    {"piece": "<9>", "cut_length_mm": 6287, "pipe_size": "2\""},
+    {"piece": "<10>", "cut_length_mm": 273, "pipe_size": "2\""},
+    {"piece": "<11>", "cut_length_mm": 340, "pipe_size": "2\""},
+    {"piece": "<12>", "cut_length_mm": 1670, "pipe_size": "2\""},
+    {"piece": "<13>", "cut_length_mm": 220, "pipe_size": "2\""},
+    {"piece": "<14>", "cut_length_mm": 100, "pipe_size": "3/4\""},
+    {"piece": "<15>", "cut_length_mm": 1041, "pipe_size": "2\""},
+    {"piece": "<16>", "cut_length_mm": 160, "pipe_size": "2\""}
+  ],
+  "bom_items": [
+    {"pt_no": 1, "description": "PIPE B-36.19 BE SEAMLESS 40S", "nominal_size": "2\"", "item_code": "PI3D217Z00913ZZZZ", "qty": "10.0M"},
+    {"pt_no": 2, "description": "PIPE B-36.19 PE SEAMLESS 80S", "nominal_size": "3/4\"", "item_code": "PI3D277Z00514ZZZZ", "qty": "0.1M"},
+    {"pt_no": 3, "description": "T.EQUAL B-16.9 BW 40S", "nominal_size": "2 x 2", "item_code": "WEGC84ZZ00913ZZZZ", "qty": "2 NO"},
+    {"pt_no": 4, "description": "WELDOLET MSS-SP97 BW 40S 80S", "nominal_size": "2 x 3/4", "item_code": "YWSAF4ZZ009130514", "qty": "1 NO"},
+    {"pt_no": 5, "description": "ELBOW.90 B-16.9 BW 1.5D 40S", "nominal_size": "2\"", "item_code": "WAGC84Z100913ZZZZ", "qty": "4 NO"},
+    {"pt_no": 6, "description": "FLNG.FIG.8 ASME-B16.48 150 FF/125AARH", "nominal_size": "2\"", "item_code": "FGKG521Z009ZZZZZ", "qty": "1 NO"},
+    {"pt_no": 7, "description": "FLNG.WN B-16.5 150 RF/125AARH 40S", "nominal_size": "2\"", "item_code": "FWCG527Z00913ZZZZ", "qty": "3 NO"},
+    {"pt_no": 8, "description": "FLNG.WN B-16.5 150 RF/125AARH 80S", "nominal_size": "3/4\"", "item_code": "FWCG527Z00514ZZZZ", "qty": "1 NO"},
+    {"pt_no": 9, "description": "FLNG.BLIND B-16.5 150 RF/125AARH", "nominal_size": "3/4\"", "item_code": "FBCG527Z005ZZZZZ", "qty": "1 NO"},
+    {"pt_no": 10, "description": "GASKET B-16.20-ANSI B16.5 SPIRAL 150", "nominal_size": "2\"", "item_code": "GK6CF72Z009ZZZZZ", "qty": "4 NO"},
+    {"pt_no": 11, "description": "GASKET B-16.20-ANSI B16.5 SPIRAL 150", "nominal_size": "3/4\"", "item_code": "GK6CF72Z005ZZZZZ", "qty": "2 NO"},
+    {"pt_no": 12, "description": "95 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "5/8\"", "item_code": "--", "qty": "4 NO"},
+    {"pt_no": 13, "description": "83 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "5/8\"", "item_code": "--", "qty": "8 NO"},
+    {"pt_no": 14, "description": "64 MM LONG BOLT.STUD WITH 2 NUTS", "nominal_size": "1/2\"", "item_code": "--", "qty": "8 NO"},
+    {"pt_no": 15, "description": "VLV.BALL SHEET 543DR", "nominal_size": "2\"", "item_code": "543DRZZZ009ZZZZZ", "qty": "1 NO"},
+    {"pt_no": 16, "description": "VLV.BALL SHEET 543DR", "nominal_size": "3/4\"", "item_code": "543DRZZZ005ZZZZZ", "qty": "1 NO"}
+  ],
+  "topology": [
+    {"type": "pipe", "spool": "<9>", "size": "2\"NS", "dim": 6351, "cut_len": 6287, "start": "CONT. FROM DRG 1"},
+    {"type": "pipe", "spool": "<10>", "size": "2\"NS", "dim": 400, "cut_len": 273, "start": "CONT. ON 2\"-WNA-418-1401-1-A82Y-G"},
+    {"type": "pipe", "spool": "<11>", "size": "2\"NS", "dim": 480, "cut_len": 340, "angle": "13°/77°"},
+    {"type": "pipe", "spool": "<12>", "size": "2\"NS", "dim": 1810, "cut_len": 1670},
+    {"type": "pipe", "spool": "<13>", "size": "2\"NS", "dim": 359, "cut_len": 220, "elevation": "EL +104593"},
+    {"type": "pipe", "spool": "<14>", "size": "3/4\"NS", "dim": 118, "cut_len": 100},
+    {"type": "pipe", "spool": "<15>", "size": "2\"NS", "dim": 1017, "cut_len": 1041},
+    {"type": "pipe", "spool": "<16>", "size": "2\"NS", "dim": 305, "cut_len": 160, "end": "CONN. TO 418-T-102B/F"}
+  ]
+}
